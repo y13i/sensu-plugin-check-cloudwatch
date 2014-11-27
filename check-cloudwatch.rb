@@ -5,7 +5,7 @@ require "aws-sdk-core"
 require "net/http"
 
 class CheckCloudWatch < Sensu::Plugin::Check::CLI
-  VERSION = "0.1.1"
+  VERSION = "0.1.2"
 
   option :profile,
     description: "Profile name of AWS shared credential file entry.",
@@ -81,7 +81,7 @@ class CheckCloudWatch < Sensu::Plugin::Check::CLI
     long:        "--unit UNIT"
 
   option :interval,
-    description: "CloudWatch statistics method.",
+    description: "Time interval between start and end for CloudWatch statistics.",
     long:        "--interval N",
     default:     600,
     proc:        proc {|v| v.to_i}
