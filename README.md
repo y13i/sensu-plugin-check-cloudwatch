@@ -10,7 +10,7 @@ Usage: check-cloudwatch.rb (options)
         --dimension-value DIMENSION_VALUE
                                      CloudWatch dimension value. (required)
         --end-time-offset N          Get metric statistics specified seconds ago.
-        --interval N                 CloudWatch statistics method.
+        --interval N                 Time interval between start and end for CloudWatch statistics.
         --metric-name METRIC_NAME    CloudWatch metric name. (required)
         --namespace NAMESPACE        CloudWatch namespace. (required)
         --period N                   CloudWatch datapoint period.
