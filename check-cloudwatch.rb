@@ -126,12 +126,12 @@ class CheckCloudWatch < Sensu::Plugin::Check::CLI
         case over_or_under
         when :over
           if metric_value > threshold
-            messages[1] = "(Expected equal or under than #{threshold})."
+            @messages[1] = "(Expected equal or under than #{threshold})."
             send severity, message
           end
         when :under
           if metric_value < threshold
-            messages[1] = "(Expected equal or over than #{threshold})."
+            @messages[1] = "(Expected equal or over than #{threshold})."
             send severity, message
           end
         end
