@@ -5,7 +5,7 @@ require "aws-sdk-core"
 require "net/http"
 
 class CheckCloudWatch < Sensu::Plugin::Check::CLI
-  VERSION = "0.1.0"
+  VERSION = "0.1.1"
 
   option :profile,
     description: "Profile name of AWS shared credential file entry.",
