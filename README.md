@@ -4,7 +4,7 @@ Generic CloudWatch check plugin for Sensu.
 
 # Installation
 
-Put `metrics-cloudwatch.rb` into `/etc/sensu/plugins`.
+Put `check-cloudwatch.rb` into `/etc/sensu/plugins`.
 
 # Requirement
 
