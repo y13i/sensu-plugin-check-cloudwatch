@@ -2,6 +2,20 @@
 
 Generic CloudWatch check plugin for Sensu.
 
+# Installation
+
+Put `metrics-cloudwatch.rb` into `/etc/sensu/plugins`.
+
+# Requirement
+
+`aws-sdk-core` gem.
+
+With sensu embedded ruby, do
+
+```
+/opt/sensu/embedded/bin/gem install aws-sdk-core
+```
+
 # Usage
 
 ```
