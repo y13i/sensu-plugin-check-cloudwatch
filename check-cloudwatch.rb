@@ -2,10 +2,9 @@
 
 require "sensu-plugin/check/cli"
 require "aws-sdk-core"
-require "net/http"
 
 class CheckCloudWatch < Sensu::Plugin::Check::CLI
-  VERSION = "0.1.2"
+  VERSION = "0.2.0"
 
   option :profile,
     description: "Profile name of AWS shared credential file entry.",
@@ -55,26 +54,18 @@ class CheckCloudWatch < Sensu::Plugin::Check::CLI
     long:        "--namespace NAMESPACE",
     required:    true
 
-  option :metric_name,
-    description: "CloudWatch metric name.",
-    long:        "--metric-name METRIC_NAME",
+  option :metric,
+    description: "CloudWatch metric name and statistics type.",
+    short:       "-m METRIC_NAME:TYPE",
+    long:        "--metric METRIC_NAME:TYPE",
     required:    true
 
-  option :dimension_name,
-    description: "CloudWatch dimension name.",
-    long:        "--dimension-name DIMENSION_NAME",
-    required:    true
-
-  option :dimension_value,
-    description: "CloudWatch dimension value.",
-    long:        "--dimension-value DIMENSION_VALUE",
-    required:    true
-
-  option :statistics,
-    description: "CloudWatch statistics method.",
-    long:        "--statistics STATISTICS",
-    default:     "Average",
-    required:    true
+  option :dimensions,
+    description: "CloudWatch dimension names and values, seperated by commas.",
+    short:       "-d DIMENSION_NAME_1:DIMENSION_VALUE_1,DIMENSION_NAME_2:DIMENSION_VALUE_2...",
+    long:        "--dimensions DIMENSION_NAME_1:DIMENSION_VALUE_1,DIMENSION_NAME_2:DIMENSION_VALUE_2...",
+    required:    true,
+    proc:        proc {|v| v.split(",")}
 
   option :unit,
     description: "CloudWatch statistics unit.",
@@ -106,15 +97,13 @@ class CheckCloudWatch < Sensu::Plugin::Check::CLI
   def run
     @messages = [
       "Current metric statistic value: `#{metric_value}`",
-      nil,
       "",
       "Namespace: #{config[:namespace]}",
-      "Metric: #{config[:metric_name]}",
-      "Dimension: #{config[:dimension_name]}/#{config[:dimension_value]}",
+      "Metric: #{config[:metric]}",
+      "Dimensions: #{config[:dimensions]}",
       "Start time: #{start_time}",
       "End time: #{end_time}",
       "Datapoint period: #{config[:period]}",
-      "Statistics: #{config[:statistics]}",
     ]
 
     [:over, :under].each do |over_or_under|
@@ -126,12 +115,12 @@ class CheckCloudWatch < Sensu::Plugin::Check::CLI
         case over_or_under
         when :over
           if metric_value > threshold
-            @messages[1] = "(Expected equal or under than #{threshold})."
+            @messages.first << " (Expected equal or under than `#{threshold}`)."
             send severity, message
           end
         when :under
           if metric_value < threshold
-            @messages[1] = "(Expected equal or over than #{threshold})."
+            @messages.first << " (Expected equal or over than `#{threshold}`)."
             send severity, message
           end
         end
@@ -156,6 +145,8 @@ class CheckCloudWatch < Sensu::Plugin::Check::CLI
 
   def own_region
     @own_region ||= begin
+      require "net/http"
+
       timeout 3 do
         Net::HTTP.get("169.254.169.254", "/latest/meta-data/placement/availability-zone").chop
       end
@@ -171,20 +162,17 @@ class CheckCloudWatch < Sensu::Plugin::Check::CLI
   def metric_value
     return @metric_value if @metric_value
 
+    metric_name, statistics = config[:metric].split(":")
+
     params = {
       namespace:   config[:namespace],
-      metric_name: config[:metric_name],
+      metric_name: metric_name,
       start_time:  start_time,
       end_time:    end_time,
       period:      config[:period],
-      statistics:  [config[:statistics]],
+      statistics:  [statistics],
+      dimensions:  config[:dimensions].map {|d| name, value = d.split(":"); {name: name, value: value}},
 
-      dimensions: [
-        {
-          name:  config[:dimension_name],
-          value: config[:dimension_value],
-        }
-      ],
     }
 
     params.update(unit: config[:unit]) if config[:unit]
@@ -197,7 +185,7 @@ class CheckCloudWatch < Sensu::Plugin::Check::CLI
     @metric_value = if datapoints.empty?
       config[:default_value]
     else
-      datapoints.sort_by {|datapoint| datapoint.timestamp}.last.send(config[:statistics].downcase.intern)
+      datapoints.sort_by {|datapoint| datapoint.timestamp}.last.send(statistics.downcase.intern)
     end
   end
 
