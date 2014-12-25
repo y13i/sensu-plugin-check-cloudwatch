@@ -97,7 +97,7 @@ class CheckCloudWatch < Sensu::Plugin::Check::CLI
   def run
     @messages = [
       "Current metric statistic value: `#{metric_value}`",
-      "",
+      nil,
       "Namespace: #{config[:namespace]}",
       "Metric: #{config[:metric]}",
       "Dimensions: #{config[:dimensions]}",
@@ -172,7 +172,6 @@ class CheckCloudWatch < Sensu::Plugin::Check::CLI
       period:      config[:period],
       statistics:  [statistics],
       dimensions:  config[:dimensions].map {|d| name, value = d.split(":"); {name: name, value: value}},
-
     }
 
     params.update(unit: config[:unit]) if config[:unit]
@@ -198,6 +197,6 @@ class CheckCloudWatch < Sensu::Plugin::Check::CLI
   end
 
   def message
-    @messages.compact.join("\n")
+    @messages.join("\n")
   end
 end
