@@ -59,4 +59,4 @@ Datapoint period: 60
 
 # Changelog
 
-**0.2.0**: replace `--metric-name` `--statistics` `--dimension-name` `--dimension-value` with `--metric` `--dimension`.
+**0.2.0**: replace `--metric-name` `--statistics` `--dimension-name` `--dimension-value` with `--metric` `--dimensions`.
