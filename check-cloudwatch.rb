@@ -94,6 +94,10 @@ class CheckCloudWatch < Sensu::Plugin::Check::CLI
     long:        "--default-value N",
     proc:        proc {|v| v.to_f}
 
+  option :empty_value_ok,
+    description: "If true, returns OK when no datapoint found.",
+    long:        "--empty-value-ok"
+
   def run
     @messages = [
       "Current metric statistic value: `#{metric_value}`",
@@ -182,7 +186,15 @@ class CheckCloudWatch < Sensu::Plugin::Check::CLI
     datapoints = response.data.datapoints
 
     @metric_value = if datapoints.empty?
-      config[:default_value]
+      if config[:default_value]
+        config[:default_value]
+      else
+        if config[:empty_value_ok]
+          ok "No datapoint found. But OK due to `--empty-value-ok`."
+        else
+          unknown "No datapoint found."
+        end
+      end
     else
       datapoints.sort_by {|datapoint| datapoint.timestamp}.last.send(statistics.downcase.intern)
     end
