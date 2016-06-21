@@ -2,6 +2,7 @@
 
 require "sensu-plugin/check/cli"
 require "aws-sdk-core"
+require "timeout"
 
 class CheckCloudWatch < Sensu::Plugin::Check::CLI
   VERSION = "0.2.0"
