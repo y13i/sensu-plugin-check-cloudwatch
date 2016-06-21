@@ -2,6 +2,7 @@
 
 require "sensu-plugin/check/cli"
 require "aws-sdk-core"
+require "timeout"
 
 class CheckCloudWatch < Sensu::Plugin::Check::CLI
   VERSION = "0.2.0"
@@ -151,7 +152,7 @@ class CheckCloudWatch < Sensu::Plugin::Check::CLI
     @own_region ||= begin
       require "net/http"
 
-      timeout 3 do
+      Timeout.timeout 3 do
         Net::HTTP.get("169.254.169.254", "/latest/meta-data/placement/availability-zone").chop
       end
     rescue
