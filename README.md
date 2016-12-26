@@ -1,3 +1,5 @@
+**NEW: [y13i/metrin](https://github.com/y13i/metrin), Single binary, simple CloudWatch CLI can replace sensu-plugin-check-cloudwatch**
+
 # Overview
 
 Generic CloudWatch check plugin for Sensu.
